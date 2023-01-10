@@ -1,0 +1,10 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "c:\\Users\\stephen.arwine\\STM32F401Test-master\\build",
+            "binaryPath": "c:\\Users\\stephen.arwine\\STM32F401Test-master\\build\\STM32F401Test.elf",
+            "binaryArgs": []
+        }
+    ],
+    "C_Cpp.errorSquiggles": "disabled"
+}
