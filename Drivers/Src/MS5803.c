@@ -32,6 +32,8 @@ void MS5803_Init()
         HAL_Delay(1);
 
         coefficients_[coeff_num] = (_byte1 << 8) | _byte2;
+
+        
     }
 }
 

@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "usb_device.h"
@@ -29,6 +30,7 @@
 #include "stdio.h"
 #include "usbd_cdc_if.h"
 #include "MS5803.h"
+#include "ZOEM8B.h"
 
 /* USER CODE END Includes */
 
@@ -95,17 +97,20 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM2_Init();
   MX_USB_DEVICE_Init();
+  MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
   // HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_2);
   TIM3->ARR = 700;
 
   HAL_TIM_PWM_Start_IT(&htim2, TIM_CHANNEL_1);
   HAL_TIM_Base_Start_IT(&htim2);
-  TIM2->ARR = 100000;
+  TIM2->ARR = 50000;
   TIM2->CCR1 = 1000;
-  TIM2->CNT = 99990;
+  TIM2->CNT = 49990;
 
   char *message = "Hello World!\r\n";
+
+  MS5803_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -113,8 +118,6 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    CDC_Transmit_FS((uint8_t *)message, strlen(message));
-    HAL_Delay(1000);
 
     /* USER CODE BEGIN 3 */
   }
