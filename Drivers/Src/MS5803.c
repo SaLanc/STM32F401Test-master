@@ -17,18 +17,23 @@ uint16_t coefficients_[8];
 void MS5803_Init()
 {
 
+    HAL_GPIO_WritePin(CS_BARO_GPIO_Port, CS_BARO_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit_IT(&hspi3, &MS5803_CMD_RES, 1);
+    HAL_GPIO_WritePin(CS_BARO_GPIO_Port, CS_BARO_Pin, GPIO_PIN_SET);
+
     HAL_Delay(300);
 
     for (uint8_t coeff_num = 1; coeff_num < 7; ++coeff_num)
     {
         uint8_t _cmd = MS5803_CMD_PROM_READ + ((coeff_num)*2);
+        HAL_GPIO_WritePin(CS_BARO_GPIO_Port, CS_BARO_Pin, GPIO_PIN_RESET);
         HAL_Delay(1);
         HAL_SPI_Transmit_IT(&hspi3, &_cmd, 1);
         HAL_Delay(1);
         uint8_t _byte1, _byte2;
         HAL_SPI_Receive_IT(&hspi3, &_byte1, 1);
         HAL_SPI_Receive_IT(&hspi3, &_byte2, 1);
+        HAL_GPIO_WritePin(CS_BARO_GPIO_Port, CS_BARO_Pin, GPIO_PIN_SET);
         HAL_Delay(1);
 
         coefficients_[coeff_num] = (_byte1 << 8) | _byte2;

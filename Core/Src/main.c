@@ -62,7 +62,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-  uint8_t MS5803_CMD_PROM_READ = 0xA2;
+  uint8_t cmd = 0xA2;
 
 
 /* USER CODE END 0 */
@@ -120,11 +120,14 @@ int main(void)
 
   while (1)
   {
-    //HAL
-    //HAL_SPI_Transmit_IT(&hspi3, &MS5803_CMD_PROM_READ, 1); 
-    
-    HAL_DELAY(10);
+    // uint8_t _byte1;
+    // HAL_GPIO_WritePin(CS_BARO_GPIO_Port, CS_BARO_Pin, GPIO_PIN_RESET);
+    // HAL_SPI_Transmit_IT(&hspi3, &cmd, 1); 
+    // HAL_SPI_Receive_IT(&hspi3, &_byte1, 1);
+    // HAL_GPIO_WritePin(CS_BARO_GPIO_Port, CS_BARO_Pin, GPIO_PIN_SET);
 
+    
+    // HAL_Delay(10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
