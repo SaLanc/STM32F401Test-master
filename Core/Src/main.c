@@ -26,16 +26,18 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "string.h"
-#include "stdio.h"
 #include "usbd_cdc_if.h"
+#include "stdbool.h"
+#include "Sample.h"
 #include "MS5803.h"
 #include "ZOEM8B.h"
+#include "ANNAB112.h"
 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+ParaBeep_t Parabeep;
 
 /* USER CODE END PTD */
 
@@ -62,15 +64,13 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-  uint8_t cmd = 0xA2;
-
 
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -101,8 +101,6 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
-  // HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_2);
-  TIM3->ARR = 700;
 
   HAL_TIM_PWM_Start_IT(&htim2, TIM_CHANNEL_1);
   HAL_TIM_Base_Start_IT(&htim2);
@@ -113,6 +111,7 @@ int main(void)
   char *message = "Hello World!\r\n";
 
   MS5803_Init();
+  bool goodSample;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -120,14 +119,20 @@ int main(void)
 
   while (1)
   {
+    goodSample = getSample_Blocking(&Parabeep);
+    HAL_Delay(50);
     // uint8_t _byte1;
     // HAL_GPIO_WritePin(CS_BARO_GPIO_Port, CS_BARO_Pin, GPIO_PIN_RESET);
-    // HAL_SPI_Transmit_IT(&hspi3, &cmd, 1); 
+    // HAL_SPI_Transmit_IT(&hspi3, &cmd, 1);
     // HAL_SPI_Receive_IT(&hspi3, &_byte1, 1);
     // HAL_GPIO_WritePin(CS_BARO_GPIO_Port, CS_BARO_Pin, GPIO_PIN_SET);
 
-    
-    // HAL_Delay(10);
+    if (goodSample == false)
+    {
+      Error_Handler();
+      /* code */
+    }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -136,22 +141,22 @@ int main(void)
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * @retval None
+ */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
   /** Configure the main internal regulator output voltage
-  */
+   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
 
   /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
+   * in the RCC_OscInitTypeDef structure.
+   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -166,9 +171,8 @@ void SystemClock_Config(void)
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+   */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
@@ -198,12 +202,36 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
 }
 
+void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+  if (hspi->Instance == SPI3)
+  {
+    MS5803_DisableSlaveRXCplt();
+  }
+}
+
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+  if (hspi->Instance == SPI3)
+  {
+    MS5803_DisableSlaveTXCplt();
+  }
+}
+
+void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+  if (hspi->Instance == SPI3)
+  {
+    /* code */
+  }
+}
+
 /* USER CODE END 4 */
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -215,14 +243,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */

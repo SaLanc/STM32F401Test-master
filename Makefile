@@ -59,9 +59,11 @@ Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c \
 Core/Src/system_stm32f4xx.c \
+Core/Src/Sample.c \
 Core/Src/gpio.c \
 Core/Src/tim.c \
 Core/Src/usart.c \
+Core/Src/spi.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c \
@@ -73,7 +75,6 @@ Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c \
 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c \
-Core/Src/spi.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c
 
 # ASM sources
