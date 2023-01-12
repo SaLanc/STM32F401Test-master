@@ -95,22 +95,29 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_TIM2_Init();
   MX_TIM3_Init();
   MX_USART2_UART_Init();
-  MX_TIM2_Init();
   MX_USB_DEVICE_Init();
-  MX_SPI3_Init();
+  //MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
+
+  MS5803_Init();
+  HAL_Delay(10);
+
 
   HAL_TIM_PWM_Start_IT(&htim2, TIM_CHANNEL_1);
   HAL_TIM_Base_Start_IT(&htim2);
   TIM2->ARR = 50000;
   TIM2->CCR1 = 1000;
-  TIM2->CNT = 49990;
+  TIM2->CNT = 4900;
 
   char *message = "Hello World!\r\n";
 
-  MS5803_Init();
+  HAL_TIM_Base_Init(&htim3);
+
+
+
   bool goodSample;
   /* USER CODE END 2 */
 
@@ -119,19 +126,13 @@ int main(void)
 
   while (1)
   {
-    goodSample = getSample_Blocking(&Parabeep);
-    HAL_Delay(50);
+    //goodSample = getSample_Blocking(&Parabeep);
+    //HAL_Delay(50);
     // uint8_t _byte1;
     // HAL_GPIO_WritePin(CS_BARO_GPIO_Port, CS_BARO_Pin, GPIO_PIN_RESET);
     // HAL_SPI_Transmit_IT(&hspi3, &cmd, 1);
     // HAL_SPI_Receive_IT(&hspi3, &_byte1, 1);
     // HAL_GPIO_WritePin(CS_BARO_GPIO_Port, CS_BARO_Pin, GPIO_PIN_SET);
-
-    if (goodSample == false)
-    {
-      Error_Handler();
-      /* code */
-    }
 
     /* USER CODE END WHILE */
 

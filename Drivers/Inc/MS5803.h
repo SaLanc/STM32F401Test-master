@@ -3,7 +3,7 @@
 
 void MS5803_Init();
 
-float MS5803_GetAltitudeBlocking();
+float MS5803_GetAltitudeBlocking(sample_t *ThisSample);
 
 uint32_t readMS5803AdcResultsOLD();
 

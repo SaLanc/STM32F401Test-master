@@ -14,5 +14,6 @@
         "stm32f4xx_hal.h": "c",
         "stm32f4xx_hal_conf.h": "c",
         "stm32f4xx_hal_def.h": "c"
-    }
+    },
+    "cortex-debug.variableUseNaturalFormat": true
 }
