@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -27,6 +28,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "usbd_cdc_if.h"
+#include "ringbuffer.h"
+#include "Utils.h"
 #include "stdbool.h"
 #include "Sample.h"
 #include "MS5803.h"
@@ -37,6 +40,9 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+uint8_t UARTRXBUFFER[64];
+uint8_t UARTRXBUFFER_SIZE = 64;
+
 ParaBeep_t Parabeep;
 
 /* USER CODE END PTD */
@@ -95,16 +101,17 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_TIM2_Init();
+  MX_DMA_Init();
   MX_TIM3_Init();
   MX_USART2_UART_Init();
+  MX_TIM2_Init();
   MX_USB_DEVICE_Init();
-  //MX_SPI3_Init();
+  MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
 
+  UtilsInit();
   MS5803_Init();
   HAL_Delay(10);
-
 
   HAL_TIM_PWM_Start_IT(&htim2, TIM_CHANNEL_1);
   HAL_TIM_Base_Start_IT(&htim2);
@@ -114,11 +121,10 @@ int main(void)
 
   char *message = "Hello World!\r\n";
 
+  HAL_UART_Transmit(&huart2, (uint8_t *)message, strlen(message), 100);
+
   HAL_TIM_Base_Init(&htim3);
 
-
-
-  bool goodSample;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -126,13 +132,12 @@ int main(void)
 
   while (1)
   {
-    //goodSample = getSample_Blocking(&Parabeep);
-    //HAL_Delay(50);
-    // uint8_t _byte1;
-    // HAL_GPIO_WritePin(CS_BARO_GPIO_Port, CS_BARO_Pin, GPIO_PIN_RESET);
-    // HAL_SPI_Transmit_IT(&hspi3, &cmd, 1);
-    // HAL_SPI_Receive_IT(&hspi3, &_byte1, 1);
-    // HAL_GPIO_WritePin(CS_BARO_GPIO_Port, CS_BARO_Pin, GPIO_PIN_SET);
+    // USART_RX_RINGPUFFER_PUT((uint8_t *)message, strlen(message));
+
+    SendUARTRingBuffer();
+    SendUSBRingBuffer();
+
+    HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 
