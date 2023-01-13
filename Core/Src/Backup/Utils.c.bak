@@ -7,6 +7,8 @@ uint8_t UARTdataRx[64];
 uint32_t UARTBuffSize;
 
 uint8_t UARTdataRx2[64];
+uint8_t USBdataRx2[64];
+
 
 uint8_t USB_RX_RING_BUFFER[64];
 struct ringbuffer USB_RX_RING_BUFFER_STRUCT;
@@ -59,7 +61,7 @@ void SendUSBRingBuffer()
     {
         for (size_t i = 0; i < USBBuffSize; i++)
         {
-            ringbuffer_get(&USART2_RX_RING_BUFFER_STRUCT, &USBdataRx[i]);
+            ringbuffer_get(&USB_RX_RING_BUFFER_STRUCT, &USBdataRx[i]);
         }
         CDC_Transmit_FS((uint8_t *)&USBdataRx, USBBuffSize);
     }
@@ -72,7 +74,9 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         uint8_t bytes = (uint8_t)Size;
         for (uint8_t i = 0; i < bytes; i++)
         {
-            ringbuffer_put(&USART2_RX_RING_BUFFER_STRUCT, UARTdataRx[i]);
+            ringbuffer_put(&USART2_RX_RING_BUFFER_STRUCT, UARTdataRx2[i]);
+            ringbuffer_put(&USB_RX_RING_BUFFER_STRUCT, UARTdataRx2[i]);
+
         }
         HAL_UARTEx_ReceiveToIdle_DMA(&huart2, UARTdataRx2, 64);
     }
