@@ -31,31 +31,31 @@ void UtilsInit()
 
 }
 
-void USB_RX_RINGPUFFER_PUT(uint8_t *Buf, uint16_t Len)
+void USB_RX_RINGPUFFER_PUT(uint8_t *Buf, uint32_t *Len)
 {
-    for (uint16_t i = 0; i < Len; i++)
+    for (uint32_t i = 0; i < *Len; i++)
     {
         ringbuffer_put(&USB_RX_RING_BUFFER_STRUCT, Buf[i]);
     }
 }
 
-void USART_RX_RINGPUFFER_PUT(uint8_t *Buf, uint16_t Len)
+void USART2_RX_RINGPUFFER_PUT(uint8_t *Buf, uint32_t *Len)
 {
-    for (uint16_t i = 0; i < Len; i++)
+    for (uint32_t i = 0; i < *Len; i++)
     {
         ringbuffer_put(&USART2_RX_RING_BUFFER_STRUCT, Buf[i]);
     }
 }
 
-void USART1_RX_RINGPUFFER_PUT(uint8_t *Buf, uint16_t Len)
+void USART1_RX_RINGPUFFER_PUT(uint8_t *Buf, uint32_t *Len)
 {
-    for (uint16_t i = 0; i < Len; i++)
+    for (uint32_t i = 0; i < *Len; i++)
     {
         ringbuffer_put(&USART1_RX_RING_BUFFER_STRUCT, Buf[i]);
     }
 }
 
-void SendUARTRingBuffer()
+void SendUART2RingBuffer()
 {
     UART2BuffSize = ringbuffer_num(&USART2_RX_RING_BUFFER_STRUCT);
 
@@ -99,20 +99,23 @@ void SendUSBRingBuffer()
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
+    uint32_t Len = (uint32_t)Size;
+
     if (huart->Instance == USART2)
     {
-        uint8_t bytes = (uint8_t)Size;
-        for (uint8_t i = 0; i < bytes; i++)
+        USART2_RX_RINGPUFFER_PUT((uint8_t *)&UART2DMAdataRx , &Len);
+        USB_RX_RINGPUFFER_PUT((uint8_t *)&UART2DMAdataRx , &Len);
+
+        for (uint16_t i = 0; i < Size; i++)
         {
-            ringbuffer_put(&USART2_RX_RING_BUFFER_STRUCT, UART2DMAdataRx[i]);
-            ringbuffer_put(&USB_RX_RING_BUFFER_STRUCT, UART2DMAdataRx[i]);
+            //ringbuffer_put(&USART2_RX_RING_BUFFER_STRUCT, UART2DMAdataRx[i]);
+            //ringbuffer_put(&USB_RX_RING_BUFFER_STRUCT, UART2DMAdataRx[i]);
         }
         HAL_UARTEx_ReceiveToIdle_DMA(&huart2, UART2DMAdataRx, 64);
     }
     if (huart->Instance == USART1)
     {
-        uint8_t bytes = (uint8_t)Size;
-        for (uint8_t i = 0; i < bytes; i++)
+        for (uint16_t i = 0; i < Size; i++)
         {
             ringbuffer_put(&USART1_RX_RING_BUFFER_STRUCT, UART1DMAdataRx[i]);
             //ringbuffer_put(&USB_RX_RING_BUFFER_STRUCT, UART1DMAdataRx[i]);

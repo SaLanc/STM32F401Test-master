@@ -135,8 +135,8 @@ int main(void)
   {
     // USART_RX_RINGPUFFER_PUT((uint8_t *)message, strlen(message));
 
-    SendUARTRingBuffer();
-    SendUART1RingBuffer();
+    SendUART2RingBuffer();
+    //SendUART1RingBuffer();
     SendUSBRingBuffer();
 
     HAL_Delay(1000);
