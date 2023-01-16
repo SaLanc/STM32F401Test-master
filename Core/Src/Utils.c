@@ -1,5 +1,8 @@
 #include "Utils.h"
 #include "usbd_cdc_if.h"
+#include <reent.h>
+#include "main.h"
+
 
 uint8_t USBdataRx[64];
 uint32_t USBBuffSize;
@@ -21,7 +24,7 @@ struct ringbuffer USART1_RX_RING_BUFFER_STRUCT;
 uint8_t USART2_RX_RING_BUFFER[64];
 struct ringbuffer USART2_RX_RING_BUFFER_STRUCT;
 
-void UtilsInit()
+void ParaBeep_Init(ParaBeep_t *ParaBeep)
 {
     ringbuffer_init(&USB_RX_RING_BUFFER_STRUCT, USB_RX_RING_BUFFER, sizeof(USB_RX_RING_BUFFER));
     ringbuffer_init(&USART2_RX_RING_BUFFER_STRUCT, USART2_RX_RING_BUFFER, sizeof(USART2_RX_RING_BUFFER));
@@ -29,6 +32,20 @@ void UtilsInit()
     HAL_UARTEx_ReceiveToIdle_DMA(&huart2, UART2DMAdataRx, 64);
     HAL_UARTEx_ReceiveToIdle_DMA(&huart1, UART1DMAdataRx, 64);
 
+    MS5803_Init();
+
+    HAL_TIM_PWM_Start_IT(&htim2, TIM_CHANNEL_1);
+    HAL_TIM_Base_Start_IT(&htim2);
+    TIM2->ARR = 50000;
+    TIM2->CCR1 = 1000;
+    TIM2->CNT = 4900;
+
+    HAL_TIM_Base_Start_IT(&htim4);
+
+
+  ParaBeep->MS5803.state = MS5803_STATE_NONE;
+  ParaBeep->MS5803.takeNewSample = true;
+  ParaBeep->MS5803.SampleReady = false;
 }
 
 void USB_RX_RINGPUFFER_PUT(uint8_t *Buf, uint32_t *Len)
@@ -98,6 +115,8 @@ void SendUSBRingBuffer()
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+
+
 {
     uint32_t Len = (uint32_t)Size;
 
@@ -105,14 +124,27 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     {
         USART2_RX_RINGPUFFER_PUT((uint8_t *)&UART2DMAdataRx , &Len);
         USB_RX_RINGPUFFER_PUT((uint8_t *)&UART2DMAdataRx , &Len);
-
+        //Restart DMA Callback
         HAL_UARTEx_ReceiveToIdle_DMA(&huart2, UART2DMAdataRx, 64);
     }
     if (huart->Instance == USART1)
     {
         USART1_RX_RINGPUFFER_PUT((uint8_t *)&UART1DMAdataRx , &Len);
         USB_RX_RINGPUFFER_PUT((uint8_t *)&UART2DMAdataRx , &Len);
-
+        //Restart DMA Callback
         HAL_UARTEx_ReceiveToIdle_DMA(&huart1, UART1DMAdataRx, 64);
     }
+}
+
+
+_ssize_t _write_r(struct _reent *ptr, /* Don't worry about what's in this for the simple case */
+                  int fd, /* ignored */
+                  const void* buf, /* the data to be sent out the UART */
+                  size_t      cnt) /* the number of bytes to be sent */
+{
+   /* Replace "huart3" with the pointer to the UART or USART instance you are using
+   * in your project
+   */         
+    CDC_Transmit_FS((uint8_t *)buf, cnt);
+   return (_ssize_t)cnt;
 }

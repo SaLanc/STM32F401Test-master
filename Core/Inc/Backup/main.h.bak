@@ -39,6 +39,18 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 
+
+typedef enum
+{
+    MS5803_STATE_NONE           = 0x00U,    //ready to start new sample process
+    MS5803_STATE_D2_CONV_WAIT   = 0x01U,    //D2 request sent, waiting 3.5ms @ 2048
+    MS5803_STATE_D2_ADC_READ    = 0x02U,    //reading D2 TX_Cplt will advance state
+    MS5803_STATE_D1_CONV_WAIT   = 0x03U,    //D1 request sent, waiting 3.5ms @ 2048
+    MS5803_STATE_D1_ADC_READ    = 0x04U,    //reading D3 TX_Cplt will advance state
+    MS5803_STATE_DATA_READY     = 0x05U,    //all data ready to conv pressure/temp
+}MS5803_CONV_STATE;
+
+
   typedef struct buzzer
   {
     bool buzzing;
@@ -61,9 +73,7 @@ extern "C" {
 
   typedef struct sample
   {
-    bool takeNewSample;
-    uint32_t tempRaw;
-    uint32_t pressureRaw;
+
     float pressureMbar;
     float temperatureCelcus;
     float pressure;
@@ -95,6 +105,17 @@ extern "C" {
     float AVGdXdT;
   } vario_t;
 
+  typedef struct MS5803
+  {
+    bool takeNewSample;
+    bool SampleReady;
+    bool ADC_CONVERTING_FINISHED;
+    uint8_t _AdcResult[3];
+    uint32_t tempRaw;
+    uint32_t pressureRaw;
+    MS5803_CONV_STATE state;
+  } MS5803_t;
+
   typedef struct ParaBeep_t
   {
     float altitude;
@@ -103,7 +124,9 @@ extern "C" {
     vario_t vario;
     button_t button;
     GPS_T GPS;
+    MS5803_t MS5803;
     bool USBConnected;
+    
   } ParaBeep_t;
 
 /* USER CODE END ET */

@@ -32,9 +32,7 @@
 #include "Utils.h"
 #include "stdbool.h"
 #include "Sample.h"
-#include "MS5803.h"
-#include "ZOEM8B.h"
-#include "ANNAB112.h"
+
 
 /* USER CODE END Includes */
 
@@ -43,7 +41,7 @@
 uint8_t UARTRXBUFFER[64];
 uint8_t UARTRXBUFFER_SIZE = 64;
 
-ParaBeep_t Parabeep;
+ParaBeep_t ParaBeep;
 
 /* USER CODE END PTD */
 
@@ -108,39 +106,54 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_SPI3_Init();
   MX_USART1_UART_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
-  UtilsInit();
-  MS5803_Init();
+
+
+  ParaBeep_Init(&ParaBeep);
+
   HAL_Delay(10);
 
-  HAL_TIM_PWM_Start_IT(&htim2, TIM_CHANNEL_1);
-  HAL_TIM_Base_Start_IT(&htim2);
-  TIM2->ARR = 50000;
-  TIM2->CCR1 = 1000;
-  TIM2->CNT = 4900;
+
 
   char *message = "Hello World!\r\n";
-
   HAL_UART_Transmit(&huart2, (uint8_t *)message, strlen(message), 100);
 
   HAL_TIM_Base_Init(&htim3);
+
+  uint32_t LastTick = HAL_GetTick();
+  uint32_t thisTick;
+  int dt;
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
+
   while (1)
   {
     // USART_RX_RINGPUFFER_PUT((uint8_t *)message, strlen(message));
-
     SendUART2RingBuffer();
     //SendUART1RingBuffer();
     SendUSBRingBuffer();
 
-    HAL_Delay(1000);
+    MS5803_Tick(&ParaBeep);
 
+    //HAL_Delay(40);
+
+    if (ParaBeep.MS5803.SampleReady)
+    {
+    ParaBeep.MS5803.SampleReady = false;
+    ParaBeep.MS5803.takeNewSample = true;
+    thisTick = HAL_GetTick();
+    dt = thisTick - LastTick;
+    LastTick = thisTick;
+    ParaBeep.altitude = ParaBeep.altitude*0.95 + ParaBeep.sample.sampleFeet*0.05;
+    printf("dt: %.2i alt: %f \r\n", dt , ParaBeep.altitude); 
+    }
+    
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -209,13 +222,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
     HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_2);
   }
+
+  if (htim->Instance == TIM4)
+  {
+    ParaBeep.MS5803.ADC_CONVERTING_FINISHED = true;
+    //htim->Instance->ARR = 1;
+  }
+  
 }
 
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
 {
   if (hspi->Instance == SPI3)
   {
-    MS5803_DisableSlaveRXCplt();
+    MS5803_DisableSlaveRXCplt(&ParaBeep.MS5803);
   }
 }
 
