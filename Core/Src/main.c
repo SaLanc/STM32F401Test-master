@@ -141,17 +141,18 @@ int main(void)
 
     MS5803_Tick(&ParaBeep);
 
-    //HAL_Delay(40);
+
 
     if (ParaBeep.MS5803.SampleReady)
     {
-    ParaBeep.MS5803.SampleReady = false;
-    ParaBeep.MS5803.takeNewSample = true;
-    thisTick = HAL_GetTick();
-    dt = thisTick - LastTick;
-    LastTick = thisTick;
-    ParaBeep.altitude = ParaBeep.altitude*0.95 + ParaBeep.sample.sampleFeet*0.05;
-    printf("dt: %.2i alt: %f \r\n", dt , ParaBeep.altitude); 
+      ParaBeep.MS5803.SampleReady = false;
+      ParaBeep.MS5803.takeNewSample = true;
+      thisTick = HAL_GetTick();
+      dt = thisTick - LastTick;
+      LastTick = thisTick;
+      ParaBeep.altitude = ParaBeep.altitude*0.95 + ParaBeep.sample.sampleFeet*0.05;
+      //printf("dt: %.2i alt: %7.2f \r\n", dt , ParaBeep.altitude); 
+      printf("alt: %7.3f \r\n", ParaBeep.altitude); 
     }
     
     /* USER CODE END WHILE */
@@ -226,7 +227,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance == TIM4)
   {
     ParaBeep.MS5803.ADC_CONVERTING_FINISHED = true;
-    //htim->Instance->ARR = 1;
   }
   
 }
@@ -253,6 +253,15 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
   {
     /* code */
   }
+}
+
+// External Interrupt ISR Handler CallBackFun
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if(GPIO_Pin == B1_Pin)
+    {
+      Enter_Standby();
+    }
 }
 
 /* USER CODE END 4 */

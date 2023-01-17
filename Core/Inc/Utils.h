@@ -24,3 +24,5 @@ void SendUART1RingBuffer();
 void SendUSBRingBuffer();
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+
+void Enter_Standby();

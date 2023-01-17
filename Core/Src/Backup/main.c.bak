@@ -41,7 +41,7 @@
 uint8_t UARTRXBUFFER[64];
 uint8_t UARTRXBUFFER_SIZE = 64;
 
-ParaBeep_t Parabeep;
+ParaBeep_t ParaBeep;
 
 /* USER CODE END PTD */
 
@@ -106,11 +106,12 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_SPI3_Init();
   MX_USART1_UART_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
 
 
-  ParaBeep_Init(&Parabeep);
+  ParaBeep_Init(&ParaBeep);
 
   HAL_Delay(10);
 
@@ -138,18 +139,20 @@ int main(void)
     //SendUART1RingBuffer();
     SendUSBRingBuffer();
 
-    MS5803_Tick(&Parabeep);
+    MS5803_Tick(&ParaBeep);
 
-    //HAL_Delay(40);
 
-    if (Parabeep.MS5803.SampleReady)
+
+    if (ParaBeep.MS5803.SampleReady)
     {
-    Parabeep.MS5803.SampleReady = false;
-    Parabeep.MS5803.takeNewSample = true;
-    thisTick = HAL_GetTick();
-    dt = thisTick - LastTick;
-    LastTick = thisTick;
-    printf("dt: %i alt: %f \r\n", dt , Parabeep.sample.sampleFeet); 
+      ParaBeep.MS5803.SampleReady = false;
+      ParaBeep.MS5803.takeNewSample = true;
+      thisTick = HAL_GetTick();
+      dt = thisTick - LastTick;
+      LastTick = thisTick;
+      ParaBeep.altitude = ParaBeep.altitude*0.95 + ParaBeep.sample.sampleFeet*0.05;
+      //printf("dt: %.2i alt: %7.2f \r\n", dt , ParaBeep.altitude); 
+      printf("alt: %7.3f \r\n", ParaBeep.altitude); 
     }
     
     /* USER CODE END WHILE */
@@ -220,13 +223,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
     HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_2);
   }
+
+  if (htim->Instance == TIM4)
+  {
+    ParaBeep.MS5803.ADC_CONVERTING_FINISHED = true;
+  }
+  
 }
 
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
 {
   if (hspi->Instance == SPI3)
   {
-    MS5803_DisableSlaveRXCplt(&Parabeep.MS5803);
+    MS5803_DisableSlaveRXCplt(&ParaBeep.MS5803);
   }
 }
 
@@ -244,6 +253,15 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
   {
     /* code */
   }
+}
+
+// External Interrupt ISR Handler CallBackFun
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if(GPIO_Pin == B1_Pin)
+    {
+      Enter_Standby();
+    }
 }
 
 /* USER CODE END 4 */

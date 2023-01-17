@@ -36,8 +36,8 @@ void ParaBeep_Init(ParaBeep_t *ParaBeep)
 
     HAL_TIM_PWM_Start_IT(&htim2, TIM_CHANNEL_1);
     HAL_TIM_Base_Start_IT(&htim2);
-    TIM2->ARR = 50000;
-    TIM2->CCR1 = 1000;
+    TIM2->ARR = 10000;
+    TIM2->CCR1 = 500;
     TIM2->CNT = 4900;
 
     HAL_TIM_Base_Start_IT(&htim4);
@@ -136,6 +136,21 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     }
 }
 
+void Enter_Standby()
+{
+
+       /* Clear the WU FLAG */
+  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+
+   /* clear the RTC Wake UP (WU) flag */
+  //__HAL_RTC_WAKEUPTIMER_CLEAR_FLAG(&hrtc, RTC_FLAG_WUTF);
+
+     /* Enable the WAKEUP PIN */
+  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
+
+    HAL_PWR_EnterSTANDBYMode();
+}
+
 
 _ssize_t _write_r(struct _reent *ptr, /* Don't worry about what's in this for the simple case */
                   int fd, /* ignored */
@@ -148,3 +163,4 @@ _ssize_t _write_r(struct _reent *ptr, /* Don't worry about what's in this for th
     CDC_Transmit_FS((uint8_t *)buf, cnt);
    return (_ssize_t)cnt;
 }
+
