@@ -260,7 +260,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
     if(GPIO_Pin == B1_Pin)
     {
-      Enter_Standby();
+      if (GPIOC->IDR & GPIO_Pin)
+      {
+        /* Falling edge, button going up */
+        Enter_Standby();
+      }
+      else{
+        /* Rising edge, button going down */
+
+      }
+      
+
     }
 }
 
