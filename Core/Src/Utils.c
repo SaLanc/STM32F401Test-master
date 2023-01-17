@@ -3,7 +3,6 @@
 #include <reent.h>
 #include "main.h"
 
-
 uint8_t USBdataRx[64];
 uint32_t USBBuffSize;
 
@@ -42,10 +41,9 @@ void ParaBeep_Init(ParaBeep_t *ParaBeep)
 
     HAL_TIM_Base_Start_IT(&htim4);
 
-
-  ParaBeep->MS5803.state = MS5803_STATE_NONE;
-  ParaBeep->MS5803.takeNewSample = true;
-  ParaBeep->MS5803.SampleReady = false;
+    ParaBeep->MS5803.state = MS5803_STATE_NONE;
+    ParaBeep->MS5803.takeNewSample = true;
+    ParaBeep->MS5803.SampleReady = false;
 }
 
 void USB_RX_RINGPUFFER_PUT(uint8_t *Buf, uint32_t *Len)
@@ -114,53 +112,56 @@ void SendUSBRingBuffer()
     }
 }
 
+void ButtonTick(ParaBeep_t *ParaBeep)
+{
+    if (ParaBeep.button.depressed)
+    {
+        if ((ParaBeep->Tick - ParaBeep->button.pressStart) > 1000)
+        {
+            Enter_Standby();
+        }
+    }
+}
+
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
-
-
 {
     uint32_t Len = (uint32_t)Size;
 
     if (huart->Instance == USART2)
     {
-        USART2_RX_RINGPUFFER_PUT((uint8_t *)&UART2DMAdataRx , &Len);
-        USB_RX_RINGPUFFER_PUT((uint8_t *)&UART2DMAdataRx , &Len);
-        //Restart DMA Callback
+        USART2_RX_RINGPUFFER_PUT((uint8_t *)&UART2DMAdataRx, &Len);
+        USB_RX_RINGPUFFER_PUT((uint8_t *)&UART2DMAdataRx, &Len);
+        // Restart DMA Callback
         HAL_UARTEx_ReceiveToIdle_DMA(&huart2, UART2DMAdataRx, 64);
     }
     if (huart->Instance == USART1)
     {
-        USART1_RX_RINGPUFFER_PUT((uint8_t *)&UART1DMAdataRx , &Len);
-        USB_RX_RINGPUFFER_PUT((uint8_t *)&UART2DMAdataRx , &Len);
-        //Restart DMA Callback
+        USART1_RX_RINGPUFFER_PUT((uint8_t *)&UART1DMAdataRx, &Len);
+        USB_RX_RINGPUFFER_PUT((uint8_t *)&UART2DMAdataRx, &Len);
+        // Restart DMA Callback
         HAL_UARTEx_ReceiveToIdle_DMA(&huart1, UART1DMAdataRx, 64);
     }
 }
 
 void Enter_Standby()
 {
+    /* Clear the WU FLAG */
+    __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
 
-       /* Clear the WU FLAG */
-  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
-
-   /* clear the RTC Wake UP (WU) flag */
-  //__HAL_RTC_WAKEUPTIMER_CLEAR_FLAG(&hrtc, RTC_FLAG_WUTF);
-
-     /* Enable the WAKEUP PIN */
-  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
+    /* Enable the WAKEUP PIN */
+    HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
 
     HAL_PWR_EnterSTANDBYMode();
 }
 
-
 _ssize_t _write_r(struct _reent *ptr, /* Don't worry about what's in this for the simple case */
-                  int fd, /* ignored */
-                  const void* buf, /* the data to be sent out the UART */
-                  size_t      cnt) /* the number of bytes to be sent */
+                  int fd,             /* ignored */
+                  const void *buf,    /* the data to be sent out the UART */
+                  size_t cnt)         /* the number of bytes to be sent */
 {
-   /* Replace "huart3" with the pointer to the UART or USART instance you are using
-   * in your project
-   */         
+    /* Replace "huart3" with the pointer to the UART or USART instance you are using
+     * in your project
+     */
     CDC_Transmit_FS((uint8_t *)buf, cnt);
-   return (_ssize_t)cnt;
+    return (_ssize_t)cnt;
 }
-

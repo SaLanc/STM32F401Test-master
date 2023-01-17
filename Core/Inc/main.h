@@ -23,33 +23,32 @@
 #define __MAIN_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
+  /* Private includes ----------------------------------------------------------*/
+  /* USER CODE BEGIN Includes */
 
 #include "stdbool.h"
 
-/* USER CODE END Includes */
+  /* USER CODE END Includes */
 
-/* Exported types ------------------------------------------------------------*/
-/* USER CODE BEGIN ET */
+  /* Exported types ------------------------------------------------------------*/
+  /* USER CODE BEGIN ET */
 
-
-typedef enum
-{
-    MS5803_STATE_NONE           = 0x00U,    //ready to start new sample process
-    MS5803_STATE_D2_CONV_WAIT   = 0x01U,    //D2 request sent, waiting 3.5ms @ 2048
-    MS5803_STATE_D2_ADC_READ    = 0x02U,    //reading D2 TX_Cplt will advance state
-    MS5803_STATE_D1_CONV_WAIT   = 0x03U,    //D1 request sent, waiting 3.5ms @ 2048
-    MS5803_STATE_D1_ADC_READ    = 0x04U,    //reading D3 TX_Cplt will advance state
-    MS5803_STATE_DATA_READY     = 0x05U,    //all data ready to conv pressure/temp
-}MS5803_CONV_STATE;
-
+  typedef enum
+  {
+    MS5803_STATE_NONE = 0x00U,         // ready to start new sample process
+    MS5803_STATE_D2_CONV_WAIT = 0x01U, // D2 request sent, waiting 3.5ms @ 2048
+    MS5803_STATE_D2_ADC_READ = 0x02U,  // reading D2 TX_Cplt will advance state
+    MS5803_STATE_D1_CONV_WAIT = 0x03U, // D1 request sent, waiting 3.5ms @ 2048
+    MS5803_STATE_D1_ADC_READ = 0x04U,  // reading D3 TX_Cplt will advance state
+    MS5803_STATE_DATA_READY = 0x05U,   // all data ready to conv pressure/temp
+  } MS5803_CONV_STATE;
 
   typedef struct buzzer
   {
@@ -118,6 +117,7 @@ typedef enum
 
   typedef struct ParaBeep_t
   {
+    uint32_t Tick;
     double altitude;
     buzzer_t buzzer;
     sample_t sample;
@@ -126,23 +126,23 @@ typedef enum
     GPS_T GPS;
     MS5803_t MS5803;
     bool USBConnected;
-    
+
   } ParaBeep_t;
 
-/* USER CODE END ET */
+  /* USER CODE END ET */
 
-/* Exported constants --------------------------------------------------------*/
-/* USER CODE BEGIN EC */
+  /* Exported constants --------------------------------------------------------*/
+  /* USER CODE BEGIN EC */
 
-/* USER CODE END EC */
+  /* USER CODE END EC */
 
-/* Exported macro ------------------------------------------------------------*/
-/* USER CODE BEGIN EM */
+  /* Exported macro ------------------------------------------------------------*/
+  /* USER CODE BEGIN EM */
 
-/* USER CODE END EM */
+  /* USER CODE END EM */
 
-/* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
+  /* Exported functions prototypes ---------------------------------------------*/
+  void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
@@ -167,9 +167,9 @@ void Error_Handler(void);
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
 
-/* USER CODE BEGIN Private defines */
+  /* USER CODE BEGIN Private defines */
 
-/* USER CODE END Private defines */
+  /* USER CODE END Private defines */
 
 #ifdef __cplusplus
 }
