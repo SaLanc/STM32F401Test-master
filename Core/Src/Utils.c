@@ -114,13 +114,43 @@ void SendUSBRingBuffer()
 
 void ButtonTick(ParaBeep_t *ParaBeep)
 {
-    if (ParaBeep.button.depressed)
+    if (ParaBeep->button.depressed)
     {
         if ((ParaBeep->Tick - ParaBeep->button.pressStart) > 1000)
         {
             Enter_Standby();
         }
     }
+    if (ParaBeep->button.pressNumber > 0)
+    {
+        if ((ParaBeep->Tick - ParaBeep->button.lastRelease) > 500)
+        {
+            ParaBeep->button.pressNumber = 0;
+        }
+        if (ParaBeep->button.pressNumber == 2)
+        {
+            if (ParaBeep->buzzer.mute)
+            {
+               ParaBeep->buzzer.mute = false;
+                HAL_TIM_PWM_Start_IT(&htim2, TIM_CHANNEL_1);
+                HAL_TIM_Base_Start_IT(&htim2);
+                TIM2->CNT = 1;
+
+
+            } else
+            {
+                ParaBeep->buzzer.mute = true;
+                HAL_TIM_PWM_Stop_IT(&htim2, TIM_CHANNEL_1);
+                HAL_TIM_Base_Stop_IT(&htim2);
+
+
+            }
+            
+        }
+        
+        
+    }
+    
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
