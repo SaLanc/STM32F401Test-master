@@ -125,30 +125,29 @@ void ButtonTick(ParaBeep_t *ParaBeep)
     {
         if ((ParaBeep->Tick - ParaBeep->button.lastRelease) > 500)
         {
+            if (ParaBeep->button.pressNumber == 2)
+            {
+                buzzerMuteToggle(&ParaBeep->buzzer);
+            }
+
+            if (ParaBeep->button.pressNumber == 4)
+            {
+                if (ParaBeep->buzzer.buzzing)
+                {
+                    ParaBeep->buzzer.buzzing = false;
+                    TIM2->ARR = 10000;
+                    TIM2->CCR1 = 500;
+                    TIM2->CNT = 4900;
+                } else
+                {   
+                    ParaBeep->buzzer.buzzing = true;
+                    TIM2->ARR  = 10000;
+                    TIM2->CCR1 = 10001;
+                    TIM2->CNT  = 4900;
+                }   
+            }
             ParaBeep->button.pressNumber = 0;
         }
-        if (ParaBeep->button.pressNumber == 2)
-        {
-            if (ParaBeep->buzzer.mute)
-            {
-               ParaBeep->buzzer.mute = false;
-                HAL_TIM_PWM_Start_IT(&htim2, TIM_CHANNEL_1);
-                HAL_TIM_Base_Start_IT(&htim2);
-                TIM2->CNT = 1;
-
-
-            } else
-            {
-                ParaBeep->buzzer.mute = true;
-                HAL_TIM_PWM_Stop_IT(&htim2, TIM_CHANNEL_1);
-                HAL_TIM_Base_Stop_IT(&htim2);
-
-
-            }
-            
-        }
-        
-        
     }
     
 }

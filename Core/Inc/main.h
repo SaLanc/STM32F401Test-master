@@ -54,11 +54,10 @@ extern "C"
   {
     bool buzzing;
     bool mute;
+    bool oneShot;
     uint32_t buzzDurration;
     uint32_t frequency;
-    uint8_t dutyCycle;
-    bool cycle_start_task;
-    bool cycle_stop_task;
+    uint32_t dutyCycle;
   } buzzer_t;
 
   typedef struct button

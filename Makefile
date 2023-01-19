@@ -66,6 +66,7 @@ Core/Src/gpio.c \
 Core/Src/tim.c \
 Core/Src/usart.c \
 Core/Src/spi.c \
+Core/Src/Buzzer.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c \

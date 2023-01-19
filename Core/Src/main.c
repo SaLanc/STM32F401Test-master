@@ -117,6 +117,8 @@ int main(void)
 
   HAL_TIM_Base_Init(&htim3);
 
+  buzzerMuteToggle(&ParaBeep.buzzer);
+
   uint32_t LastTick = HAL_GetTick();
   uint32_t thisTick;
   int dt;
@@ -136,6 +138,10 @@ int main(void)
 
     MS5803_Tick(&ParaBeep);
     ButtonTick(&ParaBeep);
+
+
+    // buzzerBeep(&ParaBeep.buzzer, 2700, 2000);
+    // HAL_Delay(5000);
 
     if (ParaBeep.MS5803.SampleReady)
     {
@@ -214,7 +220,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == TIM2)
   {
-    HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_2);
+    if (ParaBeep.buzzer.oneShot)
+    {
+      buzzerStop(&ParaBeep.buzzer);
+      ParaBeep.buzzer.oneShot = false;
+
+    }
+    else
+    {
+      HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_2);
+    }
+
   }
 
   if (htim->Instance == TIM4)

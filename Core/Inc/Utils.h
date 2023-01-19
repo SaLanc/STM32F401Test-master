@@ -6,6 +6,7 @@
 #include "MS5803.h"
 #include "ZOEM8B.h"
 #include "ANNAB112.h"
+#include "Buzzer.h"
 
 void ParaBeep_Init(ParaBeep_t *ParaBeep);
 
